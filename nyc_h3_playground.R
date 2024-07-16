@@ -50,9 +50,9 @@ map_hexes <- function(df, col_num){
    geom_sf(fill = NA, colour = 'black') +
    geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
    scale_fill_viridis_d() +
-   ggtitle('H3 hexagon mappings for NYC', subtitle = 'Resolution 5') +
+   ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon level is whatever you specified in the function earlier') +
    theme_minimal() +
    coord_sf()
 }
 
-map_hexes(ny_pts_hexes,19)
+map_hexes(ny_pts_hexes,20)
