@@ -25,22 +25,29 @@ st_crs(map)
 ggplot(map) +
   geom_sf()
 
-# centroids for all neighborhoods
-ny_pts <- st_centroid(map)
+# this function calculates the H3 hexagons (for all resolutions) that contain the centroid of each geometry in your dataset
+# the output is a dataframe that contains the original geometries and their associated H3 hexagons
+geometry_calc <- function(df # a dataframe containing a <geometry> column
+                          , join_column) # the unique id column in your dataframe
+  { 
+      points <- st_centroid(df)
+      all_hexes <- point_to_cell(points
+                                 , res = seq(0,15)
+                                 , simple = FALSE
+                              )
+      prejoin <- select(s_hex
+                        , ntacode
+                        , h3_resolution_0:h3_resolution_15
+                      )
+      ny_geom_hexes <- inner_join(map
+                           , prejoin
+                           , by = join_column
+                      )
+      view(ny_geom_hexes)
+  }
 
-#create a new column, one for each H3 hexagon 0 through 15 with the id of the hexagon containing that centroid
-ny_hexes <- point_to_cell(ny_pts
-                          , res = seq(0, 15)
-                          , simple = FALSE
-                          )
+geometry_calc(map,"ntacode")
 
-# we want our dataframe to have both the polygon geometry and the hexagons
-ny_pts_hexes <- inner_join(map
-                           ,ny_hexes
-                           , by = "ntaname"
-                           )
-
-view(ny_pts_hexes)
 
 # function to map NYC neighborhoods at specified hexagon resolution
 # for reference, column 15 is resolution 0, 16 is resolution 1, etc...
@@ -50,9 +57,9 @@ map_hexes <- function(df, col_num){
    geom_sf(fill = NA, colour = 'black') +
    geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
    scale_fill_viridis_d() +
-   ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon level is whatever you specified in the function earlier') +
+   ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon level is whatever you specified in the function earlier')
    theme_minimal() +
    coord_sf()
 }
 
-map_hexes(ny_pts_hexes,20)
+map_hexes(ny_hexes,19)
