@@ -46,20 +46,15 @@ geometry_calc <- function(df # a dataframe containing a <geometry> column
       view(ny_geom_hexes)
   }
 
-geometry_calc(map,"ntacode")
+df <- geometry_calc(map,"ntacode")
 
 
-# function to map NYC neighborhoods at specified hexagon resolution
-# for reference, column 15 is resolution 0, 16 is resolution 1, etc...
-map_hexes <- function(df, col_num){
- hex_map <- cell_to_polygon(df[,col_num], simple = FALSE)
- ggplot(hex_map[1,]) +
-   geom_sf(fill = NA, colour = 'black') +
-   geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
-   scale_fill_viridis_d() +
-   ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon level is whatever you specified in the function earlier')
-   theme_minimal() +
-   coord_sf()
-}
-
-map_hexes(ny_hexes,19)
+# plot that shows each area colored by the hexagon at resolution 6
+hex_map <- cell_to_polygon(df[,15], simple = FALSE)
+ggplot(hex_map[1,]) +
+  geom_sf(fill = NA, colour = 'black') +
+  geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
+  scale_fill_viridis_d() +
+  ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon resolution 6')
+theme_minimal() +
+  coord_sf()
