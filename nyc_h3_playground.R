@@ -16,7 +16,7 @@ library(sf)
 
 #import geodata (needs to be GeoJSON)
 # NYC data from here: https://data.cityofnewyork.us/City-Government/2010-Neighborhood-Tabulation-Areas-NTAs-/cpf4-rkhq
-map <- read_sf("/Users/ericafagin/Documents/H3/NYC/nycntas.geojson") #PUT YOUR OWN PATH HERE
+map <- read_sf("/Users/ericafagin/Documents/H3/CO/co_counties.geojson") #PUT YOUR OWN PATH HERE
 
 # CRS should be WGS84 in order to work with H3
 st_crs(map)
@@ -31,30 +31,38 @@ geometry_calc <- function(df # a dataframe containing a <geometry> column
                           , join_column) # the unique id column in your dataframe
   { 
       points <- st_centroid(df)
+      
       all_hexes <- point_to_cell(points
                                  , res = seq(0,15)
                                  , simple = FALSE
                               )
-      prejoin <- select(s_hex
-                        , ntacode
+      prejoin <- select(all_hexes
+                        , join_column
                         , h3_resolution_0:h3_resolution_15
                       )
-      ny_geom_hexes <- inner_join(map
+      
+      geom_hexes <- inner_join(df
                            , prejoin
                            , by = join_column
                       )
-      view(ny_geom_hexes)
   }
 
-df <- geometry_calc(map,"ntacode")
+df <- geometry_calc(map,"OBJECTID")
 
 
-# plot that shows each area colored by the hexagon at resolution 6
-hex_map <- cell_to_polygon(df[,15], simple = FALSE)
+# plot that shows each area colored by the hexagons
+hex_map_f <- function(df # dataframe with H3 hexgons *and* geometries for admin areas
+                      , resolution_col_num # the ordinal number of the column with the resolution of hexagon you want to map
+                      )
+{ hex_map <- cell_to_polygon(df[,resolution_col_num], simple = FALSE) 
+  
+}
+  
+hex_map_f(df,15)
+
 ggplot(hex_map[1,]) +
   geom_sf(fill = NA, colour = 'black') +
   geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
   scale_fill_viridis_d() +
-  ggtitle('H3 hexagon mappings for NYC', subtitle = 'Hexagon resolution 6')
 theme_minimal() +
   coord_sf()
