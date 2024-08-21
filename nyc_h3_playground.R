@@ -48,21 +48,3 @@ geometry_calc <- function(df # a dataframe containing a <geometry> column
   }
 
 df <- geometry_calc(map,"OBJECTID")
-
-
-# plot that shows each area colored by the hexagons
-hex_map_f <- function(df # dataframe with H3 hexgons *and* geometries for admin areas
-                      , resolution_col_num # the ordinal number of the column with the resolution of hexagon you want to map
-                      )
-{ hex_map <- cell_to_polygon(df[,resolution_col_num], simple = FALSE) 
-  
-}
-  
-hex_map_f(df,15)
-
-ggplot(hex_map[1,]) +
-  geom_sf(fill = NA, colour = 'black') +
-  geom_sf(data = hex_map, aes(fill = h3_address), alpha = 0.5) +
-  scale_fill_viridis_d() +
-theme_minimal() +
-  coord_sf()
